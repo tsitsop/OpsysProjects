@@ -11,27 +11,31 @@ void createQueue(myQueue* q) {
 }
 
 void insert(myQueue* q, processInfo process) {
-	//printf("Gonna insert something.\n");
 	if (q->itemCount >= q->size) { /* Resize array by doubling size */
-		//printf("Gotta resize.\n");
-		q->size *= 2;
-		//printf("size: %d\n", q->size);
+		q->size += 1;
 		q->queue = realloc(q->queue, q->size*sizeof(processInfo));
-		//printf("Successfully resized\n");
 	}
 
 	q->queue[q->itemCount] = process;
 
-	//printf("inserted!\n");
 	q->itemCount += 1;
-	//printf("lkdsjfl;k\n");
 }
 
-void pop(myQueue q) {
+char pop(myQueue* q) {
+	printf("The size before popping is: %d\n", q->size);
+
 	int i;
-	for (i=1; i<q.itemCount; i++) {
-		q.queue[i-1] = q.queue[i];
+	char pid = q->queue[0].processID;
+	for (i=1; i<q->itemCount; i++) {
+		q->queue[i-1] = q->queue[i];
 	}
+
+	q->size -= 1;
+	q->itemCount -= 1;
+
+	q->queue = realloc(q->queue, q->size*sizeof(processInfo));
+
+	return pid;
 }
 
 void freeQueue(myQueue* q) {

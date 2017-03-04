@@ -23,13 +23,13 @@ typedef struct {
 	int size;
 } myQueue;
 
-void fcfs(processInfo(*)[26], const int, const char*);
+void fcfs(processInfo*, const int, const char*);
 void rr(processInfo*, const int, const char*);
 void srt(processInfo*, const int, const char*);
 
 void createQueue(myQueue*);
 void insert(myQueue*, processInfo);
-void pop(myQueue);
+char pop(myQueue*);
 void freeQueue(myQueue*);
 
 #endif

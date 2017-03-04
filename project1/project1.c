@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include "algorithms.h"
 
-int parseFile(processInfo(*)[26], char*);
+int parseFile(processInfo*, char*);
 
 int main(int argc, char* argv[]) {
 	if (argc != 3) {
@@ -14,10 +14,11 @@ int main(int argc, char* argv[]) {
 	}
 
 	/* Create array to hold information from input file */
-	processInfo inputInfo[26];
+	processInfo* inputInfo = malloc(26 * sizeof(processInfo));
 
 	/* Parse the input file, populating inputInformation */
-	const int numProcesses = parseFile(&inputInfo, argv[1]);
+	
+	const int numProcesses = parseFile(inputInfo, argv[1]);
 
 	#ifdef DEBUG_MODE
 		printf("PID: %c\n", inputInfo[0].processID);
@@ -28,15 +29,16 @@ int main(int argc, char* argv[]) {
 	#endif
 
 	/* Simulate with First Come First Serve */
-	fcfs(&inputInfo, numProcesses, argv[2]);
+	fcfs(inputInfo, numProcesses, argv[2]);
 
 
 	printf("hello world we made it\n");
+	free(inputInfo);
 
 	return 0;
 }
 
-int parseFile(processInfo (*inputInfo)[26], char* fileName) {
+int parseFile(processInfo* inputInfo, char* fileName) {
 	/* Open File */
 	FILE* fp = fopen(fileName, "r");
 	if (fp == NULL) {
@@ -49,6 +51,7 @@ int parseFile(processInfo (*inputInfo)[26], char* fileName) {
 	char c;
 	char buffer[80];
 
+
 	/* Parse file */
 	while (!feof(fp)) { 
 		c = fgetc(fp);
@@ -59,24 +62,22 @@ int parseFile(processInfo (*inputInfo)[26], char* fileName) {
 
 		if (c == '#') { /* Skip this line because it is a comment */
 			fgets(buffer, sizeof(buffer), fp);
-			printf("%s\n", buffer);
 		} else if (isspace(c)) { /* Skip this line because it is whitespace */
 			fgets(buffer, sizeof(buffer), fp);
-			printf("%s\n", buffer);
 		} else { /* Read in the process information */
 			/* Rewind the file pointer by one */
 			fseek(fp, -1, SEEK_CUR);
 
-			fscanf(fp, "%c|%d|%d|%d|%d\n", &inputInfo[i]->processID, 
-				&inputInfo[i]->arrivalTime, &inputInfo[i]->cpuBurstTime,
-				&inputInfo[i]->numBursts, &inputInfo[i]->ioTime);
-
+			fscanf(fp, "%c|%d|%d|%d|%d\n", &inputInfo[i].processID,
+				&inputInfo[i].arrivalTime, &inputInfo[i].cpuBurstTime,
+				&inputInfo[i].numBursts, &inputInfo[i].ioTime);
+			
 			#ifdef DEBUG_MODE
-				printf("PID: %c\n", inputInfo[i]->processID);
-				printf("Arrival Time: %d\n", inputInfo[i]->arrivalTime);
-				printf("CPU Burst Time: %d\n", inputInfo[i]->cpuBurstTime);
-				printf("Number of CPU bursts: %d\n", inputInfo[i]->numBursts);
-				printf("IO Time: %d\n\n", inputInfo[i]->ioTime);
+				printf("PID: %c\n", inputInfo[i].processID);
+				printf("Arrival Time: %d\n", inputInfo[i].arrivalTime);
+				printf("CPU Burst Time: %d\n", inputInfo[i].cpuBurstTime);
+				printf("Number of CPU bursts: %d\n", inputInfo[i].numBursts);
+				printf("IO Time: %d\n\n", inputInfo[i].ioTime);
 			#endif
 
 			i += 1;
@@ -92,8 +93,3 @@ int parseFile(processInfo (*inputInfo)[26], char* fileName) {
 
 	return i;
 }
-
-
-
-
-// add error checking for realloc, getline etc
