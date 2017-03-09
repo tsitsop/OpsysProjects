@@ -27,6 +27,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 	int numContextSwitches = 0, numPreemptions = 0;
 	float avgBurstTime = 0;
 	int numBursts=0;
+	int entering = 0; // is something mid cpu entrance?
 
 	for(i = 0; i < n; i++) {
 		avgBurstTime += (float)(processes[i].cpuBurstTime * processes[i].numBursts);
@@ -36,7 +37,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 
 	while (1) {
-		if (isEmpty(readyQueue)) {
+		//if nothing is in the readyQueue then it should constantly take timeToBring ms to bring the next process in
+		if (isEmpty(readyQueue) && !entering) {
 			timeToBring = t_cs / 2;
 		}
 
@@ -49,12 +51,26 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			}
 		}
 
-		if (cpuTimeLeft == -1 && timeToBring == 0 && timeToRemove == 0) { /* If nothing is using the cpu and context switch complete then add a process from the queue */
-			if (!isEmpty(readyQueue)) {
-				currentCPUProcess = pop(&readyQueue);
-				cpuTimeLeft = currentCPUProcess->cpuBurstTime;
-				printf("time %dms: Process %c started using the CPU %s\n", t, currentCPUProcess->processID, getQueue(readyQueue));
+
+
+
+
+
+		// start bringing a process into the cpu when nothing is happening - this happens at beginning of each ms
+		if (cpuTimeLeft == -1 && timeToRemove == 0 && timeToBring == t_cs/2) { //process removed from cpu, nothing added yet
+			if (!isEmpty(readyQueue)) { // as long as ready queue not empty
+				currentCPUProcess = pop(&readyQueue); //pop whatever is in front
+				printf("just popped %c at time %d\n", currentCPUProcess->processID, t);
+				entering = 1; //flag to show that a process is being brought into the cpu
 			}
+		}
+
+
+
+		// a process has been brought into the cpu. it is brought in when nothing is using, being removed from, or being added to the cpu
+		if (cpuTimeLeft == -1 && timeToRemove == 0 && timeToBring == 0) { /* If nothing is using the cpu and context switch complete then add a process from the queue */
+			cpuTimeLeft = currentCPUProcess->cpuBurstTime;
+			printf("time %dms: Process %c started using the CPU %s\n", t, currentCPUProcess->processID, getQueue(readyQueue));
 		} else if (cpuTimeLeft == 0) { /* if a process finishes using the cpu */
 			currentCPUProcess->numBursts -= 1;
 			if (currentCPUProcess->numBursts != 0) {
@@ -68,9 +84,11 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 			numContextSwitches += 1;
 			cpuTimeLeft = -1;
-			timeToBring = t_cs/2; //reset the time until you can 
 			timeToRemove = t_cs/2;
+			timeToBring = t_cs/2; 
+			entering = 0;
 		}
+
 
 		/* IO Burst maintenence */
 		for (i = 0; i < n; i++) {
@@ -80,13 +98,47 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 				processes[i].ioTimeRemaining = -1;
 				insert(&readyQueue, &(processes[i]));
 				printf("time %dms: Process %c completed I/O; added to ready queue %s\n", t, processes[i].processID, getQueue(readyQueue));
+				printf("timeToBring = %d\n", timeToBring );
+				printf("timeToRemove = %d\n", timeToRemove );
+				if (cpuTimeLeft == -1 && timeToRemove == 0 && timeToBring == t_cs/2) { //process removed from cpu, nothing added yet
+					if (!isEmpty(readyQueue)) {
+						currentCPUProcess = pop(&readyQueue);
+						printf("just popped %c at time %d\n", currentCPUProcess->processID, t);
+						entering = 1;
+
+					}
+				}
 			} else { // if process is in io but not complete, decrement the counter
 				processes[i].ioTimeRemaining -= 1;
 			}
 		}
 
+		/* decrement context switch and cpu timers */
+		if (cpuTimeLeft != -1) { // if the cpu is currently being used
+			cpuTimeLeft -= 1; // decrement timer
+		} else { // if cpu is not being used, context switch stuff
+			if (timeToRemove == 0 && timeToBring > 0 && entering == 1) { // if have removed a process from the cpu and are waiting to add one
+				timeToBring -= 1;
+				// printf("time to bring is %d\n", timeToBring);
+			} else if (timeToRemove > 0) { // if you still haven't removed a process from the cpu, count down
+				timeToRemove -= 1;
+			}
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+
 		//if nothing in cpu and readyQueue is empty
-		if (cpuTimeLeft == -1 && isEmpty(readyQueue)) {
+		if (cpuTimeLeft == -1 && isEmpty(readyQueue) && entering == 0) {
 			//Check to see what is in IO
 			inIOBurst = 0;
 			for (i = 0; i < n; i++) {
@@ -102,16 +154,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			}
 		}
 
-		/* decrement cpu timer */
-		if (cpuTimeLeft != -1) { // if the cpu is currently being used
-			cpuTimeLeft -= 1; // decrement timer
-		} else { // if cpu is not being used, context switch stuff
-			if (timeToRemove == 0 && timeToBring > 0) { // if have removed a process from the cpu and are waiting to add one
-				timeToBring -= 1;
-			} else if (timeToRemove > 0) { // if you still haven't removed a process from the cpu, count down
-				timeToRemove -= 1;
-			}
-		}
+		
+
 
 		for (i = 0; i < n; i++) {
 			// if (processes[i].arrivalTime < t) { //if the process has arrived
@@ -136,6 +180,10 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 		//increment timer
 		t += 1;
+
+
+		if (t==12000)
+			break;
 	}
 
 
@@ -170,6 +218,26 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 
 /* 
+
+	process arrives and enters ready queue
+
+	process added from ready queue to cpu
+		- takes 3 ms enter cpu
+
+	process completes cpu burst
+		- added to io
+			- takes 3 ms to leave cpu
+		- terminates
+			- takes 3 ms to leave cpu
+
+	process added to io
+
+	process completes io
+		- added to ready queue
+
+
+
+
 
 	--need to figure out average stuff
 	-- probably test before??
