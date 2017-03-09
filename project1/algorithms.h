@@ -7,6 +7,9 @@ typedef struct {
 	int cpuBurstTime;
 	int numBursts;
 	int ioTime;
+	int ioTimeRemaining;
+	int totalWaitTime;
+	int totalTurnaroundTime;
 } processInfo;
 
 typedef struct {
@@ -18,7 +21,7 @@ typedef struct {
 } algorithmStats;
 
 typedef struct {
-	processInfo* queue;
+	processInfo** queue;
 	int itemCount;
 	int size;
 } myQueue;
@@ -28,8 +31,12 @@ void rr(processInfo*, const int, const char*);
 void srt(processInfo*, const int, const char*);
 
 void createQueue(myQueue*);
-void insert(myQueue*, processInfo);
-char pop(myQueue*);
+void insert(myQueue*, processInfo*);
+void insertAt(myQueue*, processInfo, int);
+processInfo* pop(myQueue*);
 void freeQueue(myQueue*);
+int isEmpty(myQueue);
+char* getQueue(myQueue);
+int contains(myQueue, char);
 
 #endif

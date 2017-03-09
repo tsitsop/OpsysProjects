@@ -21,15 +21,20 @@ int main(int argc, char* argv[]) {
 	const int numProcesses = parseFile(inputInfo, argv[1]);
 
 	#ifdef DEBUG_MODE
-		printf("PID: %c\n", inputInfo[0].processID);
-		printf("Arrival Time: %d\n", inputInfo[0].arrivalTime);
-		printf("CPU Burst Time: %d\n", inputInfo[0].cpuBurstTime);
-		printf("Number of CPU bursts: %d\n", inputInfo[0].numBursts);
-		printf("IO Time: %d\n\n", inputInfo[0].ioTime);
+		int i = 0;
+
+		for(i;i<numProcesses;i++) {
+			printf("PID: %c\n", inputInfo[i].processID);
+			printf("Arrival Time: %d\n", inputInfo[i].arrivalTime);
+			printf("CPU Burst Time: %d\n", inputInfo[i].cpuBurstTime);
+			printf("Number of CPU bursts: %d\n", inputInfo[i].numBursts);
+			printf("IO Time: %d\n\n", inputInfo[i].ioTime);
+		}
 	#endif
 
 	/* Simulate with First Come First Serve */
 	fcfs(inputInfo, numProcesses, argv[2]);
+	//printf("process %c numBursts = %d\n", inputInfo[0].processID, inputInfo[0].numBursts);
 
 
 	printf("hello world we made it\n");
@@ -71,6 +76,10 @@ int parseFile(processInfo* inputInfo, char* fileName) {
 			fscanf(fp, "%c|%d|%d|%d|%d\n", &inputInfo[i].processID,
 				&inputInfo[i].arrivalTime, &inputInfo[i].cpuBurstTime,
 				&inputInfo[i].numBursts, &inputInfo[i].ioTime);
+
+			inputInfo[i].ioTimeRemaining = -1;
+			inputInfo[i].totalWaitTime = 0;
+			inputInfo[i].totalTurnaroundTime = 0;
 			
 			#ifdef DEBUG_MODE
 				printf("PID: %c\n", inputInfo[i].processID);
