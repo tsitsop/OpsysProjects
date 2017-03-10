@@ -36,7 +36,7 @@ void insertAt(myQueue*, processInfo, int);
 processInfo* pop(myQueue*);
 void freeQueue(myQueue*);
 int isEmpty(myQueue);
-char* getQueue(myQueue);
+char* getQueue(myQueue, char*);
 int contains(myQueue, char);
 
 #endif

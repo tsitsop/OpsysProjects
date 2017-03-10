@@ -28,6 +28,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 	float avgBurstTime = 0;
 	int numBursts=0;
 	int entering = 0; // is something mid cpu entrance?
+	char* qStr;
 
 	for(i = 0; i < n; i++) {
 		avgBurstTime += (float)(processes[i].cpuBurstTime * processes[i].numBursts);
@@ -36,7 +37,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 	avgBurstTime /= numBursts;
 
 
-	printf("time %dms: Simulator started for FCFS %s\n", t, getQueue(readyQueue));
+	qStr = malloc(4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
+	printf("time %dms: Simulator started for FCFS %s\n", t, getQueue(readyQueue, qStr));
 	fflush(stdout);
 	while (1) {
 		//if nothing is in the readyQueue then it should constantly take timeToBring ms to bring the next process in
@@ -48,7 +50,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 		for (i = 0; i < n; i++) {
 			if (t == processes[i].arrivalTime) {
 				insert(&readyQueue, &(processes[i]));
-				printf("time %dms: Process %c arrived and added to ready queue %s\n", t, processes[i].processID, getQueue(readyQueue));
+				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
+				printf("time %dms: Process %c arrived and added to ready queue %s\n", t, processes[i].processID, getQueue(readyQueue, qStr));
 				fflush(stdout);
 			}
 		}
@@ -60,7 +63,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			} else if (processes[i].ioTimeRemaining == 0) { //if process completes io then insert to readyQueue
 				processes[i].ioTimeRemaining = -1;
 				insert(&readyQueue, &(processes[i]));
-				printf("time %dms: Process %c completed I/O; added to ready queue %s\n", t, processes[i].processID, getQueue(readyQueue));
+				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
+				printf("time %dms: Process %c completed I/O; added to ready queue %s\n", t, processes[i].processID, getQueue(readyQueue, qStr));
 				fflush(stdout);
 			} else { // if process is in io but not complete, decrement the counter
 				processes[i].ioTimeRemaining -= 1;
@@ -82,7 +86,8 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			currentCPUProcess = pop(&readyQueue); // pop whatever is in front
 			currentCPUProcess->totalWaitTime -= t_cs/2; 
 			cpuTimeLeft = currentCPUProcess->cpuBurstTime;
-			printf("time %dms: Process %c started using the CPU %s\n", t, currentCPUProcess->processID, getQueue(readyQueue));
+			qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
+			printf("time %dms: Process %c started using the CPU %s\n", t, currentCPUProcess->processID, getQueue(readyQueue, qStr));
 			fflush(stdout);
 			entering = 0;
 		}
@@ -95,15 +100,18 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			timeToRemove = t_cs/2;
 
 			if (currentCPUProcess->numBursts > 0) {
+				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
-					currentCPUProcess->numBursts, getQueue(readyQueue));
+					currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
 				fflush(stdout);
 				currentCPUProcess->ioTimeRemaining = currentCPUProcess->ioTime + timeToRemove - 1; ////////////////////////////subtracted 1
+				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				printf("time %dms: Process %c switching out of CPU; will block on I/O until time %dms %s\n", t, 
-					currentCPUProcess->processID, t + currentCPUProcess->ioTimeRemaining, getQueue(readyQueue));
+					currentCPUProcess->processID, t + currentCPUProcess->ioTimeRemaining, getQueue(readyQueue, qStr));
 				fflush(stdout);
 			} else {
-				printf("time %dms: Process %c terminated %s\n", t, currentCPUProcess->processID, getQueue(readyQueue));
+				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
+				printf("time %dms: Process %c terminated %s\n", t, currentCPUProcess->processID, getQueue(readyQueue, qStr));
 				fflush(stdout);
 			}
 		}
@@ -146,7 +154,6 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 				break;
 			}
 		}
-
 	}
 
 	printf("time %dms: Simulator ended for FCFS\n", t);
@@ -182,11 +189,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 		exit(1);
 	}
 
-
-
-
-
-
+	free(qStr);
 	freeQueue(&readyQueue);
 	return;
 }

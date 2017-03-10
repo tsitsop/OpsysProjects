@@ -44,33 +44,6 @@ int contains(myQueue q, char c) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // void insertAt(myQueue* q, processInfo process, int position) {
 // 	if (q->itemCount >= q->size) { /* Resize array by doubling size */
 // 		q->size += 1;
@@ -122,7 +95,7 @@ int isEmpty(myQueue q) {
 	return 1;
 }
 
-char* getQueue(myQueue q) {
+char* getQueue(myQueue q, char* qStr) {
 	if (q.itemCount == 0) {
 		return "[Q <empty>]";
 	}
@@ -130,7 +103,7 @@ char* getQueue(myQueue q) {
 	// printf("q.itemCount = %d\n", q.itemCount );
 
 	int qStrSize = 4 + 2*q.itemCount*sizeof(char);
-	char* qStr = malloc(qStrSize*sizeof(char));
+	// char* qStr = malloc(qStrSize*sizeof(char));
 
 	//printf("sizeof(qstr)-2 = %d\n", (int)sizeof(qStr)-2);
 
@@ -153,5 +126,5 @@ char* getQueue(myQueue q) {
 	}
 
 
-	return qStr;;
+	return qStr;
 }
