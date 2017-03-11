@@ -61,11 +61,12 @@ void rr(processInfo* processes, const int n, const char* outputFileName) {
       if (isEmpty(readyQueue)) //if ready queue is empty, we cant add anything to cpu. reset time leftin cpu to 0
       {
         printf("time %dms: Time slice expired; no preemption because ready queue is empty %s\n",t,getQueue(readyQueue, qStr));   
+        fflush(stdout);
       }
       else
       {
           printf("time %dms: Time slice expired; process %c preempted with %dms to go %s\n",t,currentCPUProcess->processID,currentCPUProcess->timeRemaining,getQueue(readyQueue, qStr));   
-     
+     		fflush(stdout);
      	    numContextSwitches += 1;
 			    cpuTimeLeft = -1;
 			    timeToRemove = t_cs/2;
@@ -138,20 +139,22 @@ void rr(processInfo* processes, const int n, const char* outputFileName) {
 			numContextSwitches += 1;
 			cpuTimeLeft = -1;
 			timeToRemove = t_cs/2;
-      currentCPUProcess->totalWaitTime-=t_cs/2;
+      		currentCPUProcess->totalWaitTime-=t_cs/2;
 			if (currentCPUProcess->numBursts > 0) {
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				if(currentCPUProcess->numBursts>1)
-        {
-          printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
+        		{
+         			printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
 					currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
-        }
-        else
-        {
-          printf("time %dms: Process %c completed a CPU burst; %d burst to go %s\n",t, currentCPUProcess->processID, 
+					fflush(stdout);
+        		}
+        		else
+        		{
+          		printf("time %dms: Process %c completed a CPU burst; %d burst to go %s\n",t, currentCPUProcess->processID, 
 					currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
-        }
-        currentCPUProcess->timeRemaining = currentCPUProcess->cpuBurstTime;
+          			fflush(stdout);
+   			    }
+        		currentCPUProcess->timeRemaining = currentCPUProcess->cpuBurstTime;
 				fflush(stdout);
 				currentCPUProcess->ioTimeRemaining = currentCPUProcess->ioTime + timeToRemove;
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
@@ -225,7 +228,7 @@ void rr(processInfo* processes, const int n, const char* outputFileName) {
   
 
 	/* Open File */
-	FILE* fp = fopen(outputFileName, "w");
+	FILE* fp = fopen(outputFileName, "a");
 	if (fp == NULL) {
 		fprintf(stderr, "ERROR: Could not open %s\n", outputFileName);
 		

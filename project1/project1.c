@@ -1,3 +1,5 @@
+/*Zachary Maurer, George Tsitsopoulos, Jose Guvenilir*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -36,8 +38,13 @@ int main(int argc, char* argv[]) {
 	fcfs(inputInfo, numProcesses, argv[2]);
 	//printf("process %c numBursts = %d\n", inputInfo[0].processID, inputInfo[0].numBursts);
 
+	parseFile(inputInfo, argv[1]);
+	srt(inputInfo, numProcesses, argv[2]);
 
-	printf("hello world we made it\n");
+	parseFile(inputInfo, argv[1]);
+	rr(inputInfo, numProcesses, argv[2]);
+
+	// printf("hello world we made it\n");
 	free(inputInfo);
 
 	return 0;

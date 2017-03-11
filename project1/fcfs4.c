@@ -1,5 +1,3 @@
-/*Zachary Maurer, George Tsitsopoulos, Jose Guvenilir*/
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
@@ -100,19 +98,12 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			cpuTimeLeft = -1;
 			timeToRemove = t_cs/2;
 			currentCPUProcess->totalWaitTime -= t_cs/2;
-
+			
 			if (currentCPUProcess->numBursts > 0) {
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
-				if (currentCPUProcess->numBursts > 1) {
-					printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
-						currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
-					fflush(stdout);
-				} else {
-					printf("time %dms: Process %c completed a CPU burst; %d burst to go %s\n",t, currentCPUProcess->processID, 
-						currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
-					fflush(stdout);
-				}
-
+				printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
+					currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
+				fflush(stdout);
 				currentCPUProcess->ioTimeRemaining = currentCPUProcess->ioTime + timeToRemove; ////////////////////////////subtracted 1
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				printf("time %dms: Process %c switching out of CPU; will block on I/O until time %dms %s\n", t, 
@@ -165,7 +156,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 		}
 	}
 
-	printf("time %dms: Simulator ended for FCFS\n\n", t);
+	printf("time %dms: Simulator ended for FCFS\n", t);
 	fflush(stdout);
 
 	float avgWaitTime = 0, avgTurnaroundTime = 0;
@@ -177,7 +168,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 
 	/* Open File */
-	FILE* fp = fopen(outputFileName, "a");
+	FILE* fp = fopen(outputFileName, "w");
 	if (fp == NULL) {
 		fprintf(stderr, "ERROR: Could not open %s\n", outputFileName);
 		

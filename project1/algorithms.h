@@ -1,3 +1,5 @@
+/*Zachary Maurer, George Tsitsopoulos, Jose Guvenilir*/
+
 #ifndef ALGORITHMS_H_
 #define ALGORITHMS_H_
 
@@ -10,6 +12,7 @@ typedef struct {
 	int ioTimeRemaining;
 	int totalWaitTime;
 	int totalTurnaroundTime;
+	int timeRemaining;
 } processInfo;
 
 typedef struct {
@@ -32,7 +35,7 @@ void srt(processInfo*, const int, const char*);
 
 void createQueue(myQueue*);
 void insert(myQueue*, processInfo*);
-void insertAt(myQueue*, processInfo, int);
+void insertAt(myQueue*, processInfo*);
 processInfo* pop(myQueue*);
 void freeQueue(myQueue*);
 int isEmpty(myQueue);

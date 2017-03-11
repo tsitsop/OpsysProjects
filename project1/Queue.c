@@ -1,3 +1,5 @@
+/*Zachary Maurer, George Tsitsopoulos, Jose Guvenilir*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include "algorithms.h"
@@ -7,7 +9,7 @@ void createQueue(myQueue* q) {
 	q->queue = malloc(sizeof(processInfo*));
 	q->itemCount = 0;
 	q->size = 1;
-	printf("Created Queue!\n");
+	// printf("Created Queue!\n");
 }
 
 void insert(myQueue* q, processInfo* process) {
@@ -44,27 +46,41 @@ int contains(myQueue q, char c) {
 
 
 
-// void insertAt(myQueue* q, processInfo process, int position) {
-// 	if (q->itemCount >= q->size) { /* Resize array by doubling size */
-// 		q->size += 1;
-// 		q->queue = realloc(q->queue, q->size*sizeof(processInfo));
-// 	}
+void insertAt(myQueue* q, processInfo* process) {
+	if (q->itemCount >= q->size) { /* Resize array by doubling size */
+		q->size += 1;
+		q->queue = realloc(q->queue, q->size*sizeof(processInfo));
+	}
 
-// 	int i = 0;
-// 	int j = 0;
-// 	for (i; i < q->size; i++) {
-// 		if (i < position) {
-// 			continue;
-// 		} else if (i == position) {
-// 			for (j = q->size-1; j > position; j--) {
-// 				q->queue[j] = q->queue[j-1]; 
-// 			}
-// 			q->queue[position] = process;
-// 			q->itemCount += 1;
-// 			break;
-// 		}
-// 	}
-// }
+	int i = 0;
+	int j = 0;
+
+
+	if (q->size == 1) {
+		q->queue[0] = process;
+		q->itemCount += 1;
+		return;
+	}
+
+	for (i = 0; i < q->size-1; i++) {
+		// if entering process's cpu burst time is less than this process's burst time, move everything back
+
+		if (process->cpuBurstTime < q->queue[i]->timeRemaining) { 
+
+			for (j = q->size-1; j > i; j--) { //everything moves back one in queue
+				q->queue[j] = q->queue[j-1]; 
+			}	
+
+			q->queue[i] = process; 
+			q->itemCount += 1;
+			return;
+		}
+	}
+
+	q->queue[q->itemCount] = process;
+	q->itemCount += 1;
+	return;
+}
 
 processInfo* pop(myQueue* q) {
 	//printf("The size before popping is: %d\n", q->size);
