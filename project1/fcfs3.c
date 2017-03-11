@@ -60,7 +60,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 		for (i = 0; i < n; i++) {
 			if (processes[i].ioTimeRemaining == -1) { //if process not in io do nothing
 				continue;
-			} else if (processes[i].ioTimeRemaining == 0) { //if process completes io then insert to readyQueue
+			} else if (processes[i].ioTimeRemaining == 1) { //if process completes io then insert to readyQueue
 				processes[i].ioTimeRemaining = -1;
 				insert(&readyQueue, &(processes[i]));
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
@@ -83,8 +83,7 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 
 		// if a process was entering the cpu and is now in there, it can use the cpu
 		if (entering == 1 && timeToBring == 0) {
-			currentCPUProcess = pop(&readyQueue); // pop whatever is in front
-			currentCPUProcess->totalWaitTime -= t_cs/2; 
+			currentCPUProcess = pop(&readyQueue); // pop whatever is in front 
 			cpuTimeLeft = currentCPUProcess->cpuBurstTime;
 			qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 			printf("time %dms: Process %c started using the CPU %s\n", t, currentCPUProcess->processID, getQueue(readyQueue, qStr));
@@ -98,13 +97,14 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 			numContextSwitches += 1;
 			cpuTimeLeft = -1;
 			timeToRemove = t_cs/2;
-
+			currentCPUProcess->totalWaitTime -= t_cs/2;
+			
 			if (currentCPUProcess->numBursts > 0) {
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				printf("time %dms: Process %c completed a CPU burst; %d bursts to go %s\n",t, currentCPUProcess->processID, 
 					currentCPUProcess->numBursts, getQueue(readyQueue, qStr));
 				fflush(stdout);
-				currentCPUProcess->ioTimeRemaining = currentCPUProcess->ioTime + timeToRemove - 1; ////////////////////////////subtracted 1
+				currentCPUProcess->ioTimeRemaining = currentCPUProcess->ioTime + timeToRemove; ////////////////////////////subtracted 1
 				qStr = realloc(qStr, 4 + 2*readyQueue.itemCount*sizeof(char)*sizeof(char));
 				printf("time %dms: Process %c switching out of CPU; will block on I/O until time %dms %s\n", t, 
 					currentCPUProcess->processID, t + currentCPUProcess->ioTimeRemaining, getQueue(readyQueue, qStr));
@@ -203,17 +203,24 @@ void fcfs(processInfo* processes, const int n, const char* outputFileName) {
 	process added from ready queue to cpu
 		- takes 3 ms enter cpu
 
+	process begins using cpu
+		- uses cpu until either timeslice expires or burst time ends
+
 	process completes cpu burst
 		- added to io
 			- takes 3 ms to leave cpu
 		- terminates
 			- takes 3 ms to leave cpu
 
+	timeslice expires
+		- takes 3 ms to leave cpu
+			- process removed 
+
+
 	process added to io
 
 	process completes io
 		- added to ready queue
-
 
 
 

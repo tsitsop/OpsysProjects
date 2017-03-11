@@ -80,6 +80,7 @@ int parseFile(processInfo* inputInfo, char* fileName) {
 			inputInfo[i].ioTimeRemaining = -1;
 			inputInfo[i].totalWaitTime = 0;
 			inputInfo[i].totalTurnaroundTime = 0;
+			inputInfo[i].timeRemaining = inputInfo[i].cpuBurstTime;
 			
 			#ifdef DEBUG_MODE
 				printf("PID: %c\n", inputInfo[i].processID);
