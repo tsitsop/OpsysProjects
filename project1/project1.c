@@ -61,7 +61,7 @@ int parseFile(processInfo* inputInfo, char* fileName) {
 
 	int i = 0; /* Number of processes stored */
 	char c;
-	char buffer[80];
+	char buffer[256];
 
 
 	/* Parse file */
