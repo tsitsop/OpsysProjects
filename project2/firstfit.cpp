@@ -93,6 +93,7 @@ void firstFit(std::vector<Process> processes)
 			for (unsigned int j = 0; j < processes[i].events.size(); j++) {
 				// if a process arrives at this time
 				if (processes[i].events[j].arrivalTime == t) {
+          // std::cout << "first: " << nextPlaced << std::endl;
 					std::cout << "time " << t+totalDefragTime << "ms: Process " << processes[i].id  << " arrived (requires " << processes[i].size << " frames)\n" << std::flush;
 
 					// if there is enough space to add it, add it
@@ -103,23 +104,27 @@ void firstFit(std::vector<Process> processes)
             continue;
           }
           unsigned int k;
-          int loc;
+          int loc; // the index of the free memory section that we will be adding this to
+
+          //check to see if we have exact match for next loc
           for (k = 0;k<freeMem.sections.size();k++)
           {
-
-            if (processes[i].size<=freeMem.sections[k].length && freeMem.sections[k].startLoc==nextPlaced)
+            // std::cout << "free mem start " << freeMem.sections[k].startLoc << std::endl;
+            if (processes[i].size<=freeMem.sections[k].length && freeMem.sections[k].startLoc==nextPlaced) // if we should put the process here
             {
               space = true;
-              loc = k;
+               loc = k;
+              //std::cout << "loc = " << loc << std::endl;
               break;
             }
           }
 
+          //see if we can add process later than optimal
           if(!space)
           {
             for (k = 0;k<freeMem.sections.size();k++)
             {
-              if (processes[i].size<=freeMem.sections[k].length && freeMem.sections[k].startLoc>nextPlaced)
+              if (processes[i].size<=freeMem.sections[k].length && freeMem.sections[k].startLoc>nextPlaced) //if there is enough space and this free memory section is past the next placed
               {
                 space = true;
                 loc = k;
@@ -128,6 +133,7 @@ void firstFit(std::vector<Process> processes)
             }
           }
 
+          // see if we can add the process before than optimal
           if(!space)
           {
             for (k = 0;k<freeMem.sections.size();k++)
@@ -257,7 +263,7 @@ void firstFit(std::vector<Process> processes)
               newSection.startLoc = freeMem.sections[loc].startLoc;
 							newSection.length = processes[i].size;
 
-              nextPlaced = newSection.startLoc+newSection.length+1;
+              nextPlaced = newSection.startLoc+newSection.length;
 
               freeMem.sections[loc].startLoc +=newSection.length;
               freeMem.sections[loc].length -=newSection.length;
@@ -268,9 +274,10 @@ void firstFit(std::vector<Process> processes)
 							freeMem.size -= newSection.length;
 
 							std::cout << "time " << t+totalDefragTime << "ms: Placed process " << processes[i].id<< ":\n" << std::flush;
-
+              // std::cout << nextPlaced << std::endl;
 							processes[i].events[j].active = true;
 							processes[processes.size()-1] = freeMem;
+
 
 							printMem(processes);
 					  }
